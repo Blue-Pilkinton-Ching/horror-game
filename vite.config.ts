@@ -14,7 +14,9 @@ export default defineConfig({
 		wasm(),
 		topLevelAwait(),
 		compression({
-			algorithms: ['gzip', 'brotli']
+			algorithms: ['gzip', 'brotli'],
+			include: /\.(js|mjs|json|css|html|wasm)$/,
+			threshold: 1024 // Only compress files larger than 1KB
 		})
 	]
 });
