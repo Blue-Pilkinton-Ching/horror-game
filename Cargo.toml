@@ -16,3 +16,4 @@ lto = true                 # Enable Link Time Optimization
 codegen-units = 1          # Better optimization at cost of compile time
 strip = true               # Strip symbols from binary
 panic = "abort"            # Abort on panic (smaller binary)
+debug = false              # Strip debug symbols from binary

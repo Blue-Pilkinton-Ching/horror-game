@@ -12,11 +12,11 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"dev:wasm": "cargo build --bin game --target wasm32-unknown-unknown --features bevy/dev",
+		"dev:wasm": "cargo build --bin game --target wasm32-unknown-unknown",
 		"build:wasm": "cargo build --release --bin game --target wasm32-unknown-unknown",
 		"dev:generate-wasm-bindings": "wasm-bindgen --out-dir src/lib/assets/wasm --target web ./target/wasm32-unknown-unknown/debug/game.wasm",
 		"build:generate-wasm-bindings": "wasm-bindgen --out-dir src/lib/assets/wasm --target web ./target/wasm32-unknown-unknown/release/game.wasm",
-		"build:optimize-wasm": "wasm-opt --enable-bulk-memory --enable-threads --enable-nontrapping-float-to-int -Oz -o src/lib/assets/wasm/game_bg.wasm src/lib/assets/wasm/game_bg.wasm"
+		"build:optimize-wasm": "wasm-opt --strip-producers --enable-mutable-globals --enable-sign-ext --enable-bulk-memory --enable-threads --enable-nontrapping-float-to-int -Oz --converge --strip-debug -o src/lib/assets/wasm/game_bg.wasm src/lib/assets/wasm/game_bg.wasm"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^2.0.1",
