@@ -12,7 +12,7 @@ opt-level = 3              # Optimize dependencies fully (compile once, run many
 # Release profile - optimized for smallest bundle size
 [profile.release]
 opt-level = "z"            # Optimize for size
-lto = true                 # Enable Link Time Optimization
+lto = "fat"                 # Enable Link Time Optimization
 codegen-units = 1          # Better optimization at cost of compile time
 strip = true               # Strip symbols from binary
 panic = "abort"            # Abort on panic (smaller binary)
