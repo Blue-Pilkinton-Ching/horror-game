@@ -13,6 +13,7 @@ fn main() {
     let default_plugins = DefaultPlugins.set(window_plugin);
     App::new()
         .add_plugins(default_plugins)
+        .add_plugins(UtilPlugins)
         .add_plugins((
             input::InputPlugin,
             world::WorldPlugin,

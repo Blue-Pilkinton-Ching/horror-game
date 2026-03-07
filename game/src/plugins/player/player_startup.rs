@@ -1,14 +1,10 @@
+use crate::plugins::{player::Player, util::PreviousTranslation};
+
 use bevy::prelude::*;
 
-pub fn startup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    // cube
-    commands.spawn((
-        Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
-        MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
-        Transform::from_xyz(0.0, 0.5, 0.0),
-    ));
+pub fn startup(mut commands: Commands) {
+    commands.spawn((Transform::default(), Player, PreviousTranslation::default()));
+    commands.spawn((Transform::default(), Camera3d::default()));
 }
+
+// TODO: Lerp camera position between the players previous and current position using

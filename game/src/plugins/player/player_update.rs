@@ -1,17 +1,19 @@
 use bevy::prelude::*;
 
-use crate::plugins::{input::InputActionState, player::Player};
+use crate::plugins::{player::Player, util::PreviousTranslation};
 
-pub fn update(
-    mut commands: Commands,
-    input_state: Res<InputActionState>,
-    mut player: Single<(&Player, &mut Transform)>,
+pub fn player_update(
+    mut camera_transform: Single<&mut Transform, With<Camera3d>>,
+    player_transform: Single<&Transform, With<Player>>,
+    fixed_time: Res<Time<Fixed>>,
+    player_previous_translation: Single<&PreviousTranslation, With<Player>>,
 ) {
-    if input_state.move_left {
-        player.1.translation.x -= 0.1;
-    }
+    let target = player_transform.translation;
+    let previous = player_previous_translation.value();
 
-    if input_state.move_right {
-        player.1.translation.x -= 0.1;
-    }
+    // lerp between the the position of the player last physics update, and current position
+    // Based on where this rendering step is between the steps
+    let new = previous.lerp(target, fixed_time.overstep_fraction());
+
+    camera_transform.translation = new;
 }
