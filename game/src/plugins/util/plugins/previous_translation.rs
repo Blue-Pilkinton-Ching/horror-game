@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-#[derive(Component, Default)]
+#[derive(Component, Default, Debug)]
 pub struct PreviousTranslation {
     value: Vec3,
 }
@@ -8,10 +8,6 @@ pub struct PreviousTranslation {
 impl PreviousTranslation {
     pub fn value(&self) -> Vec3 {
         self.value
-    }
-
-    pub fn new(value: Vec3) -> Self {
-        Self { value }
     }
 
     fn set(&mut self, translation: Vec3) {

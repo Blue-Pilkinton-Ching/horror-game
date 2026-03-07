@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use crate::plugins::{player::Player, util::PreviousTranslation};
 
 pub fn player_update(
-    mut camera_transform: Single<&mut Transform, With<Camera3d>>,
-    player_transform: Single<&Transform, With<Player>>,
+    mut camera_transform: Single<&mut Transform, (With<Camera3d>, Without<Player>)>,
+    player_transform: Single<&Transform, (With<Player>, Without<Camera3d>)>,
     fixed_time: Res<Time<Fixed>>,
     player_previous_translation: Single<&PreviousTranslation, With<Player>>,
 ) {

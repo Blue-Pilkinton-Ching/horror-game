@@ -13,5 +13,5 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct Player;
