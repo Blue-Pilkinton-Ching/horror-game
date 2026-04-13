@@ -36,9 +36,21 @@ pub fn start_generating_new_chunks(
             .chunks
             .entry(tile.clone())
             .or_insert_with(|| {
-                let new_chunk = Chunk::new(chunk_mesh_settings).generate();
+                let new_chunk = Chunk::new(chunk_mesh_settings.clone()).generate();
                 commands
-                    .spawn((new_chunk, Transform::from_xyz(-475.0, 0.0, -675.0)))
+                    .spawn((
+                        new_chunk,
+                        Transform::from_xyz(
+                            chunk_mesh_settings.vert_space_x
+                                * chunk_mesh_settings.verts_width as f32
+                                * -0.5,
+                            0.0,
+                            tile as f32
+                                * chunk_mesh_settings.vert_space_z
+                                * chunk_mesh_settings.verts_length as f32
+                                * -1.0,
+                        ),
+                    ))
                     .id()
             });
     }
@@ -50,6 +62,7 @@ pub fn finish_generating_new_chunks(
     player_transform: Single<&Transform, (With<Player>, Without<Camera3d>)>,
     mut chunks: Query<&mut Chunk>,
     mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let player_position = player_transform.translation;
 
@@ -95,9 +108,10 @@ pub fn finish_generating_new_chunks(
 
                     let chunk_mesh_handle = meshes.add(mesh);
 
-                    commands
-                        .entity(chunk_entity)
-                        .insert(Mesh3d(chunk_mesh_handle));
+                    commands.entity(chunk_entity).insert((
+                        Mesh3d(chunk_mesh_handle),
+                        MeshMaterial3d(materials.add(Color::WHITE)),
+                    ));
                 }
             }
         }

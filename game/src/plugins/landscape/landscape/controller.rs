@@ -62,7 +62,7 @@ impl LandscapeController {
                 * self.settings.chunk_mesh_settings.verts_width as f32
                 * -0.5,
             0.0,
-            -(tile as f32 * self.settings.chunk_mesh_settings.vert_space_z),
+            tile as f32 * self.settings.chunk_mesh_settings.vert_space_z * -1.0,
         )
     }
 }
