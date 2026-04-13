@@ -12,11 +12,7 @@ pub struct InputActionState {
 
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, startup)
-            .add_systems(Update, input_update::update);
+        app.add_systems(Update, input_update::update)
+            .init_resource::<InputActionState>();
     }
-}
-
-fn startup(mut commands: Commands) {
-    commands.init_resource::<InputActionState>();
 }
