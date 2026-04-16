@@ -131,8 +131,8 @@ impl Chunk {
                         x as f32 * self.mesh_settings.vert_space_x,
                         sample_noise(
                             0.0,
-                            z as f32 * self.mesh_settings.vert_space_z
-                                + (-self.chunk_pos.y) * self.chunk_size.y,
+                            (z as f32 * self.mesh_settings.vert_space_z)
+                                + (self.chunk_pos.y * self.chunk_size.y),
                             noise_settings.clone(),
                         ),
                         z as f32 * self.mesh_settings.vert_space_z,
