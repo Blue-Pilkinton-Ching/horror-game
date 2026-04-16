@@ -5,7 +5,10 @@ use bevy::{
     math::*,
 };
 
-use crate::plugins::landscape::landscape::chunk::{ChunkMeshSettings, ChunkNoiseSettings};
+use crate::plugins::landscape::landscape::{
+    chunk::{ChunkMeshSettings, ChunkNoiseSettings},
+    noise::sample_noise,
+};
 
 #[derive(Resource)]
 pub struct LandscapeController {
@@ -43,10 +46,7 @@ impl LandscapeController {
     pub fn new(settings: LandscapeControllerSettings) -> Self {
         Self {
             settings,
-            noise_settings: ChunkNoiseSettings {
-                noise_scale: 2.0,
-                frequency: 0.1,
-            },
+            noise_settings: ChunkNoiseSettings::new(2.0, 0.1),
             chunks: HashMap::new(),
         }
     }
@@ -75,10 +75,6 @@ impl LandscapeController {
     }
 
     pub fn sample_ground_height_at_world_position(&self, position: Vec2) -> f32 {
-        let tile = self.world_position_to_tile(position);
-        let chunk = self.chunks.get(&tile).unwrap();
-        let chunk_position = self.tile_to_world_position(tile);
-        let height = chunk.get_height(chunk_position);
-        height
+        sample_noise(position.x, position.y, self.noise_settings.clone())
     }
 }

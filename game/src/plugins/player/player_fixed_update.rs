@@ -10,7 +10,7 @@ pub fn fixed_update(
     mut transform: Single<&mut Transform, With<Player>>,
 ) {
     transform.translation.z -= 1.0;
-    landscape.
+    // landscape.translation.y = sample;
 
     if input_state.move_left {
         transform.translation.x -= 1.0;

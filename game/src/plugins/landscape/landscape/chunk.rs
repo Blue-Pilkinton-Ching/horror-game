@@ -1,19 +1,20 @@
 use bevy::{
     asset::RenderAssetUsages,
     ecs::component::Component,
+    log::error,
     math::{Vec2, Vec3},
     mesh::{Indices, Mesh, PrimitiveTopology},
-    tasks::{AsyncComputeTaskPool, Task},
+    tasks::{AsyncComputeTaskPool, Task, block_on, futures_lite::future},
 };
 
 use crate::plugins::landscape::landscape::noise::sample_noise;
 
 #[derive(Component)]
 pub struct Chunk {
-    pub mesh: GeneratableChunkMesh,
+    mesh: GeneratableChunkMesh,
     mesh_settings: ChunkMeshSettings,
     noise_settings: ChunkNoiseSettings,
-    pub chunk_pos: Vec2,
+    chunk_pos: Vec2,
     chunk_size: Vec2,
 }
 
@@ -23,10 +24,30 @@ pub struct ChunkNoiseSettings {
     pub frequency: f32,
 }
 
+impl ChunkNoiseSettings {
+    pub fn new(noise_scale: f32, frequency: f32) -> Self {
+        Self {
+            noise_scale,
+            frequency,
+        }
+    }
+}
+
 pub enum GeneratableChunkMesh {
     Generated,
     Generating(Task<Mesh>),
     Ungenerated,
+}
+
+impl PartialEq for GeneratableChunkMesh {
+    fn eq(&self, other: &Self) -> bool {
+        matches!(
+            (self, other),
+            (Self::Generated, Self::Generated)
+                | (Self::Generating(_), Self::Generating(_))
+                | (Self::Ungenerated, Self::Ungenerated)
+        )
+    }
 }
 
 #[derive(Clone)]
@@ -63,7 +84,37 @@ impl Chunk {
         self.chunk_size
     }
 
+    pub fn poll_chunk_generation_task(&mut self) -> Option<Mesh> {
+        match &mut self.mesh {
+            GeneratableChunkMesh::Generating(task) => {
+                let poll = block_on(future::poll_once(task));
+
+                match poll {
+                    // Still generating
+                    None => None,
+                    // Finished generating
+                    Some(mesh) => {
+                        self.mesh = GeneratableChunkMesh::Generated;
+                        Some(mesh)
+                    }
+                }
+            }
+            // Chunk is already generated
+            _ => None,
+        }
+    }
+
     pub fn generate(mut self) -> Self {
+        if self.mesh != GeneratableChunkMesh::Ungenerated {
+            error!(
+                "Tried to generate chunk at {}, but it is already generating/generated",
+                self.chunk_pos
+            );
+            return self;
+        }
+
+        let noise_settings = self.noise_settings.clone();
+
         let task = AsyncComputeTaskPool::get().spawn(async move {
             // TODO: On web this work still blocks the main thread.
             // Investigate rust crates that utalize js web workers for true parrelism across multiple threads
@@ -82,7 +133,7 @@ impl Chunk {
                             0.0,
                             z as f32 * self.mesh_settings.vert_space_z
                                 + (-self.chunk_pos.y) * self.chunk_size.y,
-                            self.noise_settings.clone(),
+                            noise_settings.clone(),
                         ),
                         z as f32 * self.mesh_settings.vert_space_z,
                     );

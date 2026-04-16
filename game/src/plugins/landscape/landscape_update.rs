@@ -1,11 +1,8 @@
-use bevy::{
-    prelude::*,
-    tasks::{block_on, futures_lite::future},
-};
+use bevy::prelude::*;
 
 use crate::plugins::{
     landscape::landscape::{
-        chunk::{Chunk, GeneratableChunkMesh},
+        chunk::Chunk,
         controller::{LandscapeController, Tile},
     },
     player::Player,
@@ -93,25 +90,13 @@ pub fn finish_generating_new_chunks(
             Err(_) => continue,
         };
 
-        if let GeneratableChunkMesh::Generating(task) = &mut chunk_component.mesh {
-            // TODO: Create a single future which wraps all the polls and executes them in parallel
-            let poll = block_on(future::poll_once(task));
+        if let Some(mesh) = chunk_component.poll_chunk_generation_task() {
+            let chunk_mesh_handle = meshes.add(mesh);
 
-            match poll {
-                // Still generating
-                None => (),
-                // Finished generating
-                Some(mesh) => {
-                    chunk_component.mesh = GeneratableChunkMesh::Generated;
-
-                    let chunk_mesh_handle = meshes.add(mesh);
-
-                    commands.entity(chunk_entity).insert((
-                        Mesh3d(chunk_mesh_handle),
-                        MeshMaterial3d(materials.add(Color::WHITE)),
-                    ));
-                }
-            }
+            commands.entity(chunk_entity).insert((
+                Mesh3d(chunk_mesh_handle),
+                MeshMaterial3d(materials.add(Color::WHITE)),
+            ));
         }
     }
 }
