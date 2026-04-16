@@ -1,15 +1,26 @@
 use bevy::{
     asset::RenderAssetUsages,
     ecs::component::Component,
-    math::{Vec2, Vec3, ops::sin},
+    math::{Vec2, Vec3},
     mesh::{Indices, Mesh, PrimitiveTopology},
     tasks::{AsyncComputeTaskPool, Task},
 };
 
+use crate::plugins::landscape::landscape::noise::sample_noise;
+
 #[derive(Component)]
 pub struct Chunk {
     pub mesh: GeneratableChunkMesh,
-    pub mesh_settings: ChunkMeshSettings,
+    mesh_settings: ChunkMeshSettings,
+    noise_settings: ChunkNoiseSettings,
+    pub chunk_pos: Vec2,
+    chunk_size: Vec2,
+}
+
+#[derive(Clone)]
+pub struct ChunkNoiseSettings {
+    pub noise_scale: f32,
+    pub frequency: f32,
 }
 
 pub enum GeneratableChunkMesh {
@@ -27,11 +38,29 @@ pub struct ChunkMeshSettings {
 }
 
 impl Chunk {
-    pub fn new(mesh_settings: ChunkMeshSettings) -> Self {
+    pub fn new(
+        mesh_settings: ChunkMeshSettings,
+        noise_settings: ChunkNoiseSettings,
+        chunk_pos: Vec2,
+    ) -> Self {
         Chunk {
             mesh: GeneratableChunkMesh::Ungenerated,
-            mesh_settings,
+            chunk_pos,
+            noise_settings,
+            mesh_settings: mesh_settings.clone(),
+            chunk_size: Vec2::new(
+                (mesh_settings.verts_width - 1) as f32 * mesh_settings.vert_space_x,
+                (mesh_settings.verts_length - 1) as f32 * mesh_settings.vert_space_z,
+            ),
         }
+    }
+
+    pub fn get_chunk_pos(&self) -> Vec2 {
+        self.chunk_pos
+    }
+
+    pub fn get_chunk_size(&self) -> Vec2 {
+        self.chunk_size
     }
 
     pub fn generate(mut self) -> Self {
@@ -49,7 +78,12 @@ impl Chunk {
                 for z in 0..self.mesh_settings.verts_length {
                     let vert = Vec3::new(
                         x as f32 * self.mesh_settings.vert_space_x,
-                        sin(x as f32 * 1.0 + z as f32 * 1.0) as f32 * 1.0,
+                        sample_noise(
+                            0.0,
+                            z as f32 * self.mesh_settings.vert_space_z
+                                + (-self.chunk_pos.y) * self.chunk_size.y,
+                            self.noise_settings.clone(),
+                        ),
                         z as f32 * self.mesh_settings.vert_space_z,
                     );
                     verts.push(vert);

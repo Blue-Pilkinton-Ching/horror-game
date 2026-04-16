@@ -5,10 +5,9 @@ use crate::plugins::landscape::landscape::{
     controller::{ChunkGenSettings, LandscapeController, LandscapeControllerSettings},
 };
 
+pub mod landscape;
 mod landscape_startup;
 mod landscape_update;
-
-mod landscape;
 
 pub struct LandscapePlugin;
 
