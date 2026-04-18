@@ -99,8 +99,7 @@ pub fn finish_generating_new_chunks(
                 MeshMaterial3d(materials.add(ExtendedMaterial {
                     base: StandardMaterial {
                         base_color: Color::WHITE,
-                        cull_mode: None,
-                        ..default()
+                        ..Default::default()
                     },
                     extension: TinyWorldExt {
                         params: TinyWorldParams::default(),
