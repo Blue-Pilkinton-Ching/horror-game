@@ -60,7 +60,7 @@ impl LandscapeController {
         z_position.floor() as usize
     }
 
-    pub fn tile_to_world_position(&self, tile: Tile) -> Vec3 {
+    pub fn _tile_to_world_position(&self, tile: Tile) -> Vec3 {
         Vec3::new(
             self.settings.chunk_mesh.vert_space_x
                 * self.settings.chunk_mesh.verts_width as f32

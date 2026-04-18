@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{pbr::ExtendedMaterial, prelude::*};
 
 use crate::plugins::{
     landscape::landscape::{
@@ -6,6 +6,7 @@ use crate::plugins::{
         controller::{LandscapeController, Tile},
     },
     player::Player,
+    shared::materials::{TinyWorldExt, TinyWorldMaterialExt, TinyWorldParams},
 };
 
 pub fn start_generating_new_chunks(
@@ -59,7 +60,7 @@ pub fn finish_generating_new_chunks(
     player_transform: Single<&Transform, (With<Player>, Without<Camera3d>)>,
     mut chunks: Query<&mut Chunk>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<TinyWorldMaterialExt>>,
 ) {
     let player_position = player_transform.translation;
 
@@ -95,7 +96,16 @@ pub fn finish_generating_new_chunks(
 
             commands.entity(chunk_entity).insert((
                 Mesh3d(chunk_mesh_handle),
-                MeshMaterial3d(materials.add(Color::WHITE)),
+                MeshMaterial3d(materials.add(ExtendedMaterial {
+                    base: StandardMaterial {
+                        base_color: Color::WHITE,
+                        cull_mode: None,
+                        ..default()
+                    },
+                    extension: TinyWorldExt {
+                        params: TinyWorldParams::default(),
+                    },
+                })),
             ));
         }
     }

@@ -4,16 +4,15 @@
     view_transformations::position_world_to_clip
 }
 
-struct WobbleParams {
-    amplitude : f32,
-    frequency : f32,
-    speed     : f32,
-    phase     : f32,
-    time      : f32,
+struct TinyWorldParams {
+    curve_strength: f32,
+    player_position_z: f32,
+    falloff_rate: f32,
+    origin_offset: f32,
 };
 
-@group(2) @binding(100)
-var<uniform> params : WobbleParams;
+@group(#{MATERIAL_BIND_GROUP}) @binding(100)
+var<uniform> params : TinyWorldParams;
 
 @vertex
 fn vertex(in: Vertex) -> VertexOutput {
@@ -24,13 +23,18 @@ fn vertex(in: Vertex) -> VertexOutput {
         vec4<f32>(in.position, 1.0)
     );
 
-    /* --- Apply wobble in world space ----------------------------- */
-    let phase = in.position.x * params.frequency +
-                (params.time + params.phase) * params.speed;
-    world_pos.z += sin(phase) * params.amplitude;
+    var rel_z = world_pos.z - params.player_position_z;
+    var x = max(abs(rel_z) - params.origin_offset, 0.0);
+    var rotation_amount = params.curve_strength * (1.0 - exp(-x * x * params.falloff_rate)) * -sign(rel_z);
+
+    var new_z = (rel_z * cos(rotation_amount)) - (world_pos.y * sin(rotation_amount));
+    var new_y = (rel_z * sin(rotation_amount)) + (world_pos.y * cos(rotation_amount));
+
+    world_pos.z = new_z + params.player_position_z;
+    world_pos.y = new_y;
 
     /* --- Fill the required output struct ------------------------- */
-    var out : VertexOutput;
+    var out: VertexOutput;
     out.world_position = world_pos;
     out.position = position_world_to_clip(world_pos.xyz);
 

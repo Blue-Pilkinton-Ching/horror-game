@@ -63,7 +63,7 @@ impl Chunk {
         }
     }
 
-    pub fn get_chunk_pos(&self) -> Vec2 {
+    pub fn _get_chunk_pos(&self) -> Vec2 {
         self.chunk_pos
     }
 

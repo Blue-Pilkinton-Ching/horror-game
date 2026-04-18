@@ -38,9 +38,9 @@ impl Plugin for LandscapePlugin {
                     noise_x_freq_multiplier: 0.05,
                     noise_fn: Arc::new(Multiply::new(
                         Fbm::<Perlin>::new(GROUND_SEED)
-                            .set_frequency(0.005)
+                            .set_frequency(0.001)
                             .set_octaves(3),
-                        Constant::new(20.0),
+                        Constant::new(100.0),
                     )),
                 },
             }));

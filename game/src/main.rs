@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::plugins::*;
+use crate::plugins::{shared::materials::TinyWorldMaterialExt, *};
 
 mod plugins;
 fn main() {
@@ -14,6 +14,7 @@ fn main() {
     App::new()
         .add_plugins(default_plugins)
         .add_plugins(UtilPlugins)
+        .add_plugins(MaterialPlugin::<TinyWorldMaterialExt>::default())
         .add_plugins((
             input::InputPlugin,
             world::WorldPlugin,
