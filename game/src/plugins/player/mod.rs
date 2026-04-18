@@ -5,8 +5,11 @@ mod player_startup;
 mod player_update;
 pub struct PlayerPlugin;
 
-// 1.8 meters
+// Meters
 pub const PLAYER_HEIGHT: f32 = 1.8;
+// Meters per second
+pub const PLAYER_RUN_SPEED: f32 = 80.0;
+pub const PLAYER_STRAFE_SPEED: f32 = 30.0;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {

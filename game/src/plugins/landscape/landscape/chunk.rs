@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use bevy::{
     asset::RenderAssetUsages,
     ecs::component::Component,
@@ -7,13 +9,13 @@ use bevy::{
     tasks::{AsyncComputeTaskPool, Task, block_on, futures_lite::future},
 };
 
-use crate::plugins::landscape::landscape::noise::sample_noise;
+use crate::plugins::landscape::landscape::noise::{NoiseSettings, sample_noise};
 
 #[derive(Component)]
 pub struct Chunk {
     mesh: GeneratableChunkMesh,
     mesh_settings: ChunkMeshSettings,
-    noise_settings: ChunkNoiseSettings,
+    noise_settings: NoiseSettings,
     chunk_pos: Vec2,
     chunk_size: Vec2,
 }
@@ -46,7 +48,7 @@ pub struct ChunkMeshSettings {
 impl Chunk {
     pub fn new(
         mesh_settings: ChunkMeshSettings,
-        noise_settings: ChunkNoiseSettings,
+        noise_settings: NoiseSettings,
         chunk_pos: Vec2,
     ) -> Self {
         Chunk {
@@ -98,7 +100,11 @@ impl Chunk {
             return self;
         }
 
-        let noise_settings = self.noise_settings.clone();
+        let mesh_settings = self.mesh_settings.clone();
+        let noise_fn = Arc::clone(&self.noise_settings.noise_fn);
+        let noise_x_freq_multiplier = self.noise_settings.noise_x_freq_multiplier;
+        let chunk_pos = self.chunk_pos;
+        let chunk_size = self.chunk_size;
 
         let task = AsyncComputeTaskPool::get().spawn(async move {
             // TODO: On web this work still blocks the main thread.
@@ -110,19 +116,19 @@ impl Chunk {
 
             let mut tris = Vec::new();
 
-            for x in 0..self.mesh_settings.verts_width {
-                for z in 0..self.mesh_settings.verts_length {
+            for x in 0..mesh_settings.verts_width {
+                for z in 0..mesh_settings.verts_length {
                     let vert = Vec3::new(
-                        x as f32 * self.mesh_settings.vert_space_x,
+                        x as f32 * mesh_settings.vert_space_x,
                         sample_noise(
                             Vec2::new(
-                                x as f32,
-                                (z as f32 * self.mesh_settings.vert_space_z)
-                                    + (self.chunk_pos.y * self.chunk_size.y),
+                                x as f32 * noise_x_freq_multiplier as f32,
+                                (z as f32 * mesh_settings.vert_space_z)
+                                    + (chunk_pos.y * chunk_size.y),
                             ),
-                            noise_settings.clone(),
+                            noise_fn.as_ref(),
                         ),
-                        z as f32 * self.mesh_settings.vert_space_z,
+                        z as f32 * mesh_settings.vert_space_z,
                     );
                     verts.push(vert);
 
@@ -130,23 +136,21 @@ impl Chunk {
                     normals.push(normal);
 
                     let uv = Vec2::new(
-                        x as f32 * self.mesh_settings.vert_space_x,
-                        z as f32 * self.mesh_settings.vert_space_z,
+                        x as f32 * mesh_settings.vert_space_x,
+                        z as f32 * mesh_settings.vert_space_z,
                     );
 
                     uvs.push(uv);
 
-                    if x < self.mesh_settings.verts_width - 1
-                        && z < self.mesh_settings.verts_length - 1
-                    {
-                        let i = x * self.mesh_settings.verts_length + z;
+                    if x < mesh_settings.verts_width - 1 && z < mesh_settings.verts_length - 1 {
+                        let i = x * mesh_settings.verts_length + z;
                         // first tri
                         tris.push(i as u32);
                         tris.push((i + 1) as u32);
-                        tris.push((i + self.mesh_settings.verts_length + 1) as u32);
+                        tris.push((i + mesh_settings.verts_length + 1) as u32);
                         // second tri
-                        tris.push((i + self.mesh_settings.verts_length + 1) as u32);
-                        tris.push((i + self.mesh_settings.verts_length) as u32);
+                        tris.push((i + mesh_settings.verts_length + 1) as u32);
+                        tris.push((i + mesh_settings.verts_length) as u32);
                         tris.push(i as u32);
                     }
                 }

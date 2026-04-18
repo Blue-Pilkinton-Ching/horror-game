@@ -21,22 +21,22 @@ pub fn start_generating_new_chunks(
     let max_tile = min_tile
         + landscape_controller
             .settings
-            .chunk_gen_settings
+            .chunk_gen
             .chunk_generation_distance;
 
     let tiles: Vec<Tile> = (min_tile..max_tile).collect();
 
     for tile in tiles {
-        let chunk_mesh_settings = landscape_controller.settings.chunk_mesh_settings.clone();
-        let chunk_noise_settings = landscape_controller.noise_settings.clone();
+        let chunk_mesh_settings = landscape_controller.settings.chunk_mesh.clone();
+        let noise_settings = landscape_controller.settings.noise.clone();
 
         landscape_controller
             .chunks
             .entry(tile.clone())
             .or_insert_with(|| {
                 let new_chunk = Chunk::new(
-                    chunk_mesh_settings.clone(),
-                    chunk_noise_settings,
+                    chunk_mesh_settings,
+                    noise_settings,
                     Vec2::new(0.0, tile as f32 * -1.0),
                 )
                 .generate();
@@ -69,7 +69,7 @@ pub fn finish_generating_new_chunks(
     let max_tile = min_tile
         + landscape_controller
             .settings
-            .chunk_gen_settings
+            .chunk_gen
             .chunk_generation_distance;
 
     let tiles: Vec<Tile> = (min_tile..max_tile).collect();

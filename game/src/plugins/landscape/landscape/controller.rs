@@ -6,14 +6,13 @@ use bevy::{
 };
 
 use crate::plugins::landscape::landscape::{
-    chunk::{ChunkMeshSettings, ChunkNoiseSettings},
-    noise::sample_noise,
+    chunk::ChunkMeshSettings,
+    noise::{NoiseSettings, sample_noise},
 };
 
 #[derive(Resource)]
 pub struct LandscapeController {
     pub settings: LandscapeControllerSettings,
-    pub noise_settings: ChunkNoiseSettings,
     // Chunks are keyed by their tile position
     pub chunks: HashMap<Tile, ChunkEntity>,
 }
@@ -25,8 +24,9 @@ pub type ChunkEntity = Entity;
 pub type Tile = usize;
 
 pub struct LandscapeControllerSettings {
-    pub chunk_mesh_settings: ChunkMeshSettings,
-    pub chunk_gen_settings: ChunkGenSettings,
+    pub chunk_mesh: ChunkMeshSettings,
+    pub chunk_gen: ChunkGenSettings,
+    pub noise: NoiseSettings,
 }
 
 pub struct ChunkGenSettings {
@@ -46,7 +46,6 @@ impl LandscapeController {
     pub fn new(settings: LandscapeControllerSettings) -> Self {
         Self {
             settings,
-            noise_settings: ChunkNoiseSettings::new(2.0, 0.1),
             chunks: HashMap::new(),
         }
     }
@@ -54,8 +53,8 @@ impl LandscapeController {
     pub fn world_position_to_tile(&self, position: Vec3) -> Tile {
         // multiply by -1 because chunks generate towards neg z, but tile positions are positive towards neg z
         let z_position = -1.0 * position.z
-            / (self.settings.chunk_mesh_settings.verts_length as f32
-                * self.settings.chunk_mesh_settings.vert_space_z);
+            / (self.settings.chunk_mesh.verts_length as f32
+                * self.settings.chunk_mesh.vert_space_z);
 
         // Floor to make Tiles be 0 indexed.
         z_position.floor() as usize
@@ -63,18 +62,24 @@ impl LandscapeController {
 
     pub fn tile_to_world_position(&self, tile: Tile) -> Vec3 {
         Vec3::new(
-            self.settings.chunk_mesh_settings.vert_space_x
-                * self.settings.chunk_mesh_settings.verts_width as f32
+            self.settings.chunk_mesh.vert_space_x
+                * self.settings.chunk_mesh.verts_width as f32
                 * -0.5,
             0.0,
             tile as f32
-                * self.settings.chunk_mesh_settings.verts_length as f32
-                * self.settings.chunk_mesh_settings.vert_space_z
+                * self.settings.chunk_mesh.verts_length as f32
+                * self.settings.chunk_mesh.vert_space_z
                 * -1.0,
         )
     }
 
     pub fn sample_ground_height_at_world_position(&self, position: Vec2) -> f32 {
-        sample_noise(position, self.noise_settings.clone())
+        sample_noise(
+            Vec2 {
+                x: position.x * self.settings.noise.noise_x_freq_multiplier as f32,
+                y: position.y,
+            },
+            self.settings.noise.noise_fn.as_ref(),
+        )
     }
 }
