@@ -7,3 +7,4 @@ edition = "2024"
 [dependencies]
 # Could potentially use webgpu feature in the future
 bevy = {version = "0.18.0", default-features = false, features = ["3d"]} 
+noise = "0.9.0"

@@ -20,10 +20,10 @@ impl Plugin for LandscapePlugin {
             .insert_resource(LandscapeController::new(LandscapeControllerSettings {
                 chunk_gen_settings: ChunkGenSettings::default(),
                 chunk_mesh_settings: ChunkMeshSettings {
-                    verts_width: 20,
-                    verts_length: 20,
-                    vert_space_x: 1.0,
-                    vert_space_z: 1.0,
+                    verts_width: 50,
+                    verts_length: 50,
+                    vert_space_x: 2.0,
+                    vert_space_z: 2.0,
                 },
             }));
     }

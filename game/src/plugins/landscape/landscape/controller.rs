@@ -75,6 +75,6 @@ impl LandscapeController {
     }
 
     pub fn sample_ground_height_at_world_position(&self, position: Vec2) -> f32 {
-        sample_noise(position.x, position.y, self.noise_settings.clone())
+        sample_noise(position, self.noise_settings.clone())
     }
 }

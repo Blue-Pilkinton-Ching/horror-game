@@ -18,21 +18,6 @@ pub struct Chunk {
     chunk_size: Vec2,
 }
 
-#[derive(Clone)]
-pub struct ChunkNoiseSettings {
-    pub noise_scale: f32,
-    pub frequency: f32,
-}
-
-impl ChunkNoiseSettings {
-    pub fn new(noise_scale: f32, frequency: f32) -> Self {
-        Self {
-            noise_scale,
-            frequency,
-        }
-    }
-}
-
 pub enum GeneratableChunkMesh {
     Generated,
     Generating(Task<Mesh>),
@@ -130,9 +115,11 @@ impl Chunk {
                     let vert = Vec3::new(
                         x as f32 * self.mesh_settings.vert_space_x,
                         sample_noise(
-                            0.0,
-                            (z as f32 * self.mesh_settings.vert_space_z)
-                                + (self.chunk_pos.y * self.chunk_size.y),
+                            Vec2::new(
+                                x as f32,
+                                (z as f32 * self.mesh_settings.vert_space_z)
+                                    + (self.chunk_pos.y * self.chunk_size.y),
+                            ),
                             noise_settings.clone(),
                         ),
                         z as f32 * self.mesh_settings.vert_space_z,
