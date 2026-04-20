@@ -13,20 +13,20 @@ BOUND_WASM := $(WASM_OUT_DIR)/$(APP_NAME)_bg.wasm
 .PHONY: dev build preview check check-watch lint format prepare \
         dev-wasm build-wasm \
         dev-generate-wasm-bindings build-generate-wasm-bindings \
-        build-optimize-wasm clean
+        build-optimize-wasm copy-assets clean
 
 # ------------------------
 # High-level targets
 # ------------------------
 
-dev: dev-wasm dev-generate-wasm-bindings
+dev: dev-wasm dev-generate-wasm-bindings copy-assets
 	pnpm exec vite dev
 
-build: build-wasm build-generate-wasm-bindings build-optimize-wasm
+build: build-wasm build-generate-wasm-bindings build-optimize-wasm copy-assets
 	pnpm exec vite build
 
 preview:
-	sirv build --host --single --gzip --brotli
+	sirv build --host --single --gzip --brotli --no-cache
 
 # ------------------------
 # Tooling / checks
@@ -85,6 +85,13 @@ build-optimize-wasm:
 		--strip-debug \
 		-o $(BOUND_WASM) \
 		$(BOUND_WASM)
+
+# ------------------------
+# Assets
+# ------------------------
+
+copy-assets:
+	cp -r game/assets static/assets
 
 # ------------------------
 # Cleanup

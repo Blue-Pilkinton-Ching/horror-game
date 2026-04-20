@@ -97,6 +97,9 @@ jobs:
             -o src/lib/assets/wasm/game_bg.wasm \
             src/lib/assets/wasm/game_bg.wasm
 
+      - name: Copy game assets to static
+        run: cp -r game/assets static/assets
+
       - name: Build SvelteKit site
         run: pnpm exec vite build
 
