@@ -14,10 +14,8 @@ use crate::plugins::landscape::landscape::{
 pub struct LandscapeController {
     pub settings: LandscapeControllerSettings,
     // Chunks are keyed by their tile position
-    pub chunks: HashMap<Tile, ChunkEntity>,
+    pub chunks: HashMap<Tile, Entity>,
 }
-
-pub type ChunkEntity = Entity;
 
 // The tile is the position of the chunk.
 // Chunks can only generate towards neg z, so this is the distance from the origin toward neg z in chunks.

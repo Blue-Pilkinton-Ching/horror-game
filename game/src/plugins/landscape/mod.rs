@@ -24,6 +24,7 @@ impl Plugin for LandscapePlugin {
             // .add_systems(Startup, landscape_startup::startup)
             .add_systems(Update, landscape_update::start_generating_new_chunks)
             .add_systems(Update, landscape_update::finish_generating_new_chunks)
+            .add_systems(Update, landscape_update::destroy_past_chunks)
             .insert_resource(LandscapeController::new(LandscapeControllerSettings {
                 chunk_gen: ChunkGenSettings::default(),
                 chunk_mesh: ChunkMeshSettings {

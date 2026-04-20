@@ -107,3 +107,27 @@ pub fn finish_generating_new_chunks(
         }
     }
 }
+
+pub fn destroy_past_chunks(
+    mut commands: Commands,
+    mut landscape_controller: ResMut<LandscapeController>,
+    player_transform: Single<&Transform, (With<Player>, Without<Camera3d>)>,
+) {
+    let player_position = player_transform.translation;
+
+    let player_tile: usize = landscape_controller
+        .world_position_to_tile(player_position)
+        .into();
+
+    landscape_controller
+        .chunks
+        .iter()
+        .filter(|chunk| *chunk.0 < player_tile)
+        .map(|(key, entity)| (*key, entity.clone()))
+        .collect::<Vec<_>>()
+        .iter()
+        .for_each(|(key, entity)| {
+            commands.entity(*entity).despawn();
+            landscape_controller.chunks.remove(key);
+        });
+}
