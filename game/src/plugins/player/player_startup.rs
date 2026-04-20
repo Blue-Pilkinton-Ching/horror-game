@@ -9,5 +9,3 @@ pub fn startup(mut commands: Commands) {
         Camera3d::default(),
     ));
 }
-
-// TODO: Lerp camera position between the players previous and current position using

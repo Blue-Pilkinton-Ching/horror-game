@@ -6,7 +6,7 @@ use crate::plugins::{
         controller::{LandscapeController, Tile},
     },
     player::Player,
-    shared::materials::{TinyWorldExt, TinyWorldMaterialExt, TinyWorldParams},
+    shared::materials::{TinyWorldExt, TinyWorldMaterialExt},
 };
 
 pub fn start_generating_new_chunks(
@@ -101,9 +101,7 @@ pub fn finish_generating_new_chunks(
                         base_color: Color::WHITE,
                         ..Default::default()
                     },
-                    extension: TinyWorldExt {
-                        params: TinyWorldParams::default(),
-                    },
+                    extension: TinyWorldExt::default(),
                 })),
             ));
         }
