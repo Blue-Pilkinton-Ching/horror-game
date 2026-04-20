@@ -122,8 +122,9 @@ impl Chunk {
                         x as f32 * mesh_settings.vert_space_x,
                         sample_noise(
                             Vec2::new(
-                                (x as f32 * mesh_settings.vert_space_x)
-                                    + (chunk_pos.x * chunk_size.x) * noise_x_freq_multiplier as f32,
+                                ((x as f32 * mesh_settings.vert_space_x)
+                                    + (chunk_pos.x * chunk_size.x))
+                                    * noise_x_freq_multiplier as f32,
                                 (z as f32 * mesh_settings.vert_space_z)
                                     + (chunk_pos.y * chunk_size.y),
                             ),
