@@ -1,0 +1,117 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment runs at a time; a new push cancels the in-progress one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Rust ──────────────────────────────────────────────────────────────
+      - name: Install Rust stable + wasm32 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      # Swatinem/rust-cache handles ~/.cargo (registry, git, bin) and target/
+      # correctly — it prunes stale artifacts and keeps cache sizes sane.
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      # ── wasm-bindgen-cli (pre-built binary, no compile) ───────────────────
+      # Version must exactly match the wasm-bindgen version in Cargo.lock.
+      - name: Derive wasm-bindgen version from Cargo.lock
+        id: wbg
+        run: |
+          VERSION=$(cargo metadata --format-version 1 \
+            | jq -r '.packages[] | select(.name == "wasm-bindgen") | .version' \
+            | head -1)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Install wasm-bindgen-cli
+        run: |
+          VERSION="${{ steps.wbg.outputs.version }}"
+          curl -sSL "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/${VERSION}/wasm-bindgen-${VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+            | tar -xz --strip-components=1 -C /usr/local/bin \
+              "wasm-bindgen-${VERSION}-x86_64-unknown-linux-musl/wasm-bindgen"
+
+      # ── wasm-opt (binaryen, pre-built binary) ─────────────────────────────
+      # apt ships binaryen 108 (2022) on ubuntu-24.04 — too old and potentially
+      # incompatible with LLVM 20+ generated Wasm. Use the upstream release.
+      - name: Install wasm-opt
+        run: |
+          BINARYEN_VERSION=121
+          curl -sSL "https://github.com/WebAssembly/binaryen/releases/download/version_${BINARYEN_VERSION}/binaryen-version_${BINARYEN_VERSION}-x86_64-linux.tar.gz" \
+            | tar -xz --strip-components=2 -C /usr/local/bin \
+              "binaryen-version_${BINARYEN_VERSION}/bin/wasm-opt"
+
+      # ── Node / pnpm ───────────────────────────────────────────────────────
+      # pnpm version is read from the packageManager field in package.json.
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── Build ─────────────────────────────────────────────────────────────
+      - name: Build WASM (release)
+        run: cargo build --release --bin game --target wasm32-unknown-unknown
+
+      - name: Generate wasm-bindgen bindings
+        run: |
+          wasm-bindgen \
+            --out-dir src/lib/assets/wasm \
+            --target web \
+            target/wasm32-unknown-unknown/release/game.wasm
+
+      - name: Optimise WASM
+        run: |
+          wasm-opt \
+            --strip-producers \
+            --enable-mutable-globals \
+            --enable-sign-ext \
+            --enable-bulk-memory \
+            --enable-threads \
+            --enable-nontrapping-float-to-int \
+            -Oz \
+            --converge \
+            --strip-debug \
+            -o src/lib/assets/wasm/game_bg.wasm \
+            src/lib/assets/wasm/game_bg.wasm
+
+      - name: Build SvelteKit site
+        run: pnpm exec vite build
+
+      # ── Upload ────────────────────────────────────────────────────────────
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
