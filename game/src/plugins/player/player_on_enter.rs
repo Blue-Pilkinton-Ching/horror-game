@@ -1,12 +1,13 @@
 use crate::plugins::{
     landscape::{self, landscape::noise::sample_noise},
     player::Player,
+    shared::marker_components::MainCamera,
     util::PreviousTranslation,
 };
 
 use bevy::prelude::*;
 
-pub fn startup(
+pub fn on_enter_game(
     mut commands: Commands,
     landscape: Res<landscape::landscape::controller::LandscapeController>,
 ) {
@@ -27,5 +28,6 @@ pub fn startup(
     commands.spawn((
         spawn_pos.looking_to(Vec3::NEG_Z, Vec3::Y),
         Camera3d::default(),
+        MainCamera,
     ));
 }

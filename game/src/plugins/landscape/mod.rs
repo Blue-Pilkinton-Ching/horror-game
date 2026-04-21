@@ -11,7 +11,6 @@ use crate::plugins::landscape::landscape::{
 };
 
 pub mod landscape;
-mod landscape_startup;
 mod landscape_update;
 
 pub struct LandscapePlugin;

@@ -8,6 +8,7 @@ pub struct InputPlugin;
 pub struct InputActionState {
     pub move_left: bool,
     pub move_right: bool,
+    pub kill: bool,
 }
 
 impl Plugin for InputPlugin {
