@@ -9,8 +9,10 @@ use crate::plugins::landscape::landscape::{
     controller::{ChunkGenSettings, LandscapeController, LandscapeControllerSettings},
     noise::NoiseSettings,
 };
+use crate::state::AppState;
 
 pub mod landscape;
+mod landscape_on_exit;
 mod landscape_update;
 
 pub struct LandscapePlugin;
@@ -21,9 +23,16 @@ impl Plugin for LandscapePlugin {
     fn build(&self, app: &mut App) {
         app
             // .add_systems(Startup, landscape_startup::startup)
-            .add_systems(Update, landscape_update::start_generating_new_chunks)
-            .add_systems(Update, landscape_update::finish_generating_new_chunks)
-            .add_systems(Update, landscape_update::destroy_past_chunks)
+            .add_systems(
+                Update,
+                (
+                    landscape_update::start_generating_new_chunks,
+                    landscape_update::finish_generating_new_chunks,
+                    landscape_update::destroy_past_chunks,
+                )
+                    .run_if(in_state(AppState::InGame)),
+            )
+            .add_systems(OnExit(AppState::InGame), landscape_on_exit::on_exit_game)
             .insert_resource(LandscapeController::new(LandscapeControllerSettings {
                 chunk_gen: ChunkGenSettings::default(),
                 chunk_mesh: ChunkMeshSettings {

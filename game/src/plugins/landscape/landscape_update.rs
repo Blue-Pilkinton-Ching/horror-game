@@ -57,8 +57,8 @@ pub fn start_generating_new_chunks(
 pub fn finish_generating_new_chunks(
     mut commands: Commands,
     landscape_controller: ResMut<LandscapeController>,
-    player_transform: Single<&Transform, (With<Player>, Without<Camera3d>)>,
     mut chunks: Query<&mut Chunk>,
+    player_transform: Single<&Transform, (With<Player>, Without<Camera3d>)>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<TinyWorldMaterialExt>>,
 ) {

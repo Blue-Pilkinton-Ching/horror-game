@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::state::AppState;
+
 #[derive(Component, Default, Debug)]
 pub struct PreviousTranslation {
     value: Vec3,
@@ -24,6 +26,9 @@ pub struct PreviousTranslationPlugin;
 
 impl Plugin for PreviousTranslationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedPreUpdate, fixed_pre_update);
+        app.add_systems(
+            FixedPreUpdate,
+            fixed_pre_update.run_if(in_state(AppState::InGame)),
+        );
     }
 }

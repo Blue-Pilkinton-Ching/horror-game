@@ -5,7 +5,10 @@ const RIGHT_KEYS: [KeyCode; 3] = [KeyCode::KeyD, KeyCode::ArrowRight, KeyCode::K
 
 const KILL_KEYS: [KeyCode; 1] = [KeyCode::KeyK];
 
-pub fn update(keys: Res<ButtonInput<KeyCode>>, mut input_state: ResMut<super::InputActionState>) {
+pub fn game_update(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut input_state: ResMut<super::InputActionState>,
+) {
     // TODO: Handle other forms of input (gamepads?, mouse?, mobile touch? )
 
     if LEFT_KEYS.iter().any(|key| keys.pressed(*key)) {
