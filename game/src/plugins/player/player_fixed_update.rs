@@ -1,9 +1,12 @@
 use bevy::prelude::*;
 
-use crate::plugins::{
-    input::InputActionState,
-    landscape::landscape::controller::LandscapeController,
-    player::{PLAYER_HEIGHT, PLAYER_RUN_SPEED, PLAYER_STRAFE_SPEED, Player, PlayerDeath},
+use crate::{
+    plugins::{
+        input::InputActionState,
+        landscape::landscape::controller::LandscapeController,
+        player::{PLAYER_HEIGHT, PLAYER_RUN_SPEED, PLAYER_STRAFE_SPEED, Player},
+    },
+    state::AppState,
 };
 
 pub fn fixed_update(
@@ -31,6 +34,7 @@ pub fn fixed_update(
     // Player death logic should only be calculated in the FixedUpdate step
     // Only the player should be able to trigger the kill event
     if input_state.kill {
-        commands.trigger(PlayerDeath(Player));
+        // TODO: Remove this maybe?
+        commands.set_state(AppState::MainMenu);
     }
 }

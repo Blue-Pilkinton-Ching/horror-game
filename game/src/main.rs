@@ -24,6 +24,7 @@ fn main() {
             input::InputPlugin,
             player::PlayerPlugin,
             landscape::LandscapePlugin,
+            UIPlugins,
         ))
         .run();
 }
